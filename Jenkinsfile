@@ -36,7 +36,8 @@ pipeline {
         stage('Check status'){
 			steps {
 				script {
-                    // Execute a shell command and capture its standard output
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                        // Execute a shell command and capture its standard output
                     def deploymentStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --request-timeout=30s || echo FAILED').trim()
 
                     // Print the captured output to the Jenkins console
@@ -54,11 +55,12 @@ pipeline {
                         def rollbackStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --request-timeout=30s || echo FAILED').trim()
                         if (rollbackStatus.contains("successfully rolled out")) {
                         error "Deployment is failure, Rollback is success"
-                    }
+                        }
                         else {
                             error "Deployment is failure, Rollback is failure. Application is not running"
+                            }
                         }
-                    }
+                    }                    
                 }
             }
         }
