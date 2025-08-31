@@ -33,6 +33,34 @@ pipeline {
                 }
 			}
 		}
+        stage('Check status'){
+			steps {
+				script {
+                    // Execute a shell command and capture its standard output
+                    def deploymentStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --request-timeout=30s || echo FAILED').trim()
+
+                    // Print the captured output to the Jenkins console
+                    echo "Output of 'kubectl rollout status deployment/catalogue-deployment --request-timeout=30s':"
+                    echo deploymentStatus
+
+                    // You can also use the output in further steps
+                    if (deploymentStatus.contains(successfully rolled out)) {
+                        echo "Deployment is success!"
+                    } else {
+                        sh"""
+                            helm rollback ${COMPONENT} -n ${PROJECT}
+                            sleep 20
+                        """
+                        def rollbackStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --request-timeout=30s || echo FAILED').trim()
+                        if (rollbackStatus.contains(successfully rolled out)) {
+                        error "Deployment is failure, Rollback is success"
+                    }
+                    else {
+                        error "Deployment is failure, Rollback is failure. Application is not running"
+                    }
+                }
+			}
+		}
     }
 	
     post { 
