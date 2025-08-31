@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalogue-deployment
+  namespace: roboshop
+  # deployment labels, these belong to the deployment itself, not the Pods.
+  labels:
+    component: catalogue
+    project: roboshop_top-level
+    tier: app-catalogue
+    # These labels identify and organize the ReplicaSet resource itself.
+    # Used by users or tools to filter ReplicaSets, search, and group resources. (e.g., kubectl get all -l project=roboshop_top-level (or) kubectl get rs -l project=roboshop_top-level).
+    # Not used by ReplicaSet controller to create or manage Pods.
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels: # Tells ReplicaSet which Pods to manage
+      component: catalogue
+      project: roboshop
+      tier: app-catalogue
+      # These labels define which Pods the ReplicaSet should watch and manage.
+      # If any Pod in the cluster matches these labels, the ReplicaSet counts them toward its replica count.
+      # This selector must exactly match the template labels so the RS can manage the Pods it creates.
+  template:
+    metadata: # Labels for the Pods it creates
+      labels: 
+        component: catalogue
+        project: roboshop
+        tier: app-catalogue
+        # These labels are app-cataloguelied to new Pods created by the ReplicaSet.
+        # They should match the selector labels so the ReplicaSet can identify and manage these Pods.
+        # If they don’t match, the RS will never associate with the Pods it creates, causing errors or orphan Pods.
+    spec:
+      containers:
+      - name: catalogue
+        image: "{{ .Values.deployment.imageURL }}:{{ .Values.deployment.imageVersion }}"
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+          limits:
+            cpu: "100m"
+            memory: "256Mi"
+        envFrom:
+        - configMapRef:
+            name: catalogue-configmap
