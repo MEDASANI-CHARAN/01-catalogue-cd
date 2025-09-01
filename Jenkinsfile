@@ -38,7 +38,7 @@ pipeline {
 				script {
                     withAWS(credentials: 'aws-creds', region: 'us-east-1') {
                         // Execute a shell command and capture its standard output
-                    def deploymentStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --timeout=30s -n ${PROJECT} || echo FAILED').trim()
+                    def deploymentStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --timeout=25s -n ${PROJECT} || echo FAILED').trim()
 
                     // def -> defination
                     // trim() -> To nremove the extra spaces
@@ -51,7 +51,7 @@ pipeline {
                             helm rollback ${COMPONENT} -n ${PROJECT}
                             sleep 20
                         """
-                        def rollbackStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --timeout=35s -n ${PROJECT} || echo FAILED').trim()
+                        def rollbackStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --timeout=30s -n ${PROJECT} || echo FAILED').trim()
                         if (rollbackStatus.contains("successfully rolled out")) {
                         error "2.Deployment is failure, Rollback is success"
                         }
