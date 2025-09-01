@@ -45,18 +45,18 @@ pipeline {
 
                     // You can also use the output in further steps
                     if (deploymentStatus.contains("successfully rolled out")) {
-                        echo "Deployment is success!"
+                        echo "1.Deployment is success!"
                     } else {
                         sh"""
                             helm rollback ${COMPONENT} -n ${PROJECT}
                             sleep 20
                         """
-                        def rollbackStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --timeout=30s -n ${PROJECT} || echo FAILED').trim()
+                        def rollbackStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --timeout=35s -n ${PROJECT} || echo FAILED').trim()
                         if (rollbackStatus.contains("successfully rolled out")) {
-                        error "Deployment is failure, Rollback is success"
+                        error "2.Deployment is failure, Rollback is success"
                         }
                         else {
-                            error "Deployment is failure, Rollback is failure. Application is not running"
+                            error "3.Deployment is failure, Rollback is failure. Application is not running"
                             }
                         }
                     }                    
