@@ -38,7 +38,7 @@ pipeline {
 				script {
                     withAWS(credentials: 'aws-creds', region: 'us-east-1') {
                         // Execute a shell command and capture its standard output
-                    def deploymentStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --request-timeout=30s -n ${PROJECT} || echo FAILED').trim()
+                    def deploymentStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --timeout=30s -n ${PROJECT} || echo FAILED').trim()
 
                     // Print the captured output to the Jenkins console
                     echo "Output of 'kubectl rollout status deployment/catalogue-deployment --request-timeout=30s':"
@@ -52,7 +52,7 @@ pipeline {
                             helm rollback ${COMPONENT} -n ${PROJECT}
                             sleep 20
                         """
-                        def rollbackStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --request-timeout=30s || echo FAILED').trim()
+                        def rollbackStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --timeout=30s || echo FAILED').trim()
                         if (rollbackStatus.contains("successfully rolled out")) {
                         error "Deployment is failure, Rollback is success"
                         }
