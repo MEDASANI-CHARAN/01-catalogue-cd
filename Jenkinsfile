@@ -40,9 +40,8 @@ pipeline {
                         // Execute a shell command and capture its standard output
                     def deploymentStatus = sh(returnStdout: true, script: 'kubectl rollout status deployment/catalogue-deployment --timeout=30s -n ${PROJECT} || echo FAILED').trim()
 
-                    // Print the captured output to the Jenkins console
-                    echo "Output of 'kubectl rollout status deployment/catalogue-deployment --request-timeout=30s':"
-                    echo deploymentStatus
+                    // def -> defination
+                    // trim() -> To nremove the extra spaces
 
                     // You can also use the output in further steps
                     if (deploymentStatus.contains("successfully rolled out")) {
